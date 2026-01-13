@@ -3,7 +3,7 @@
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) NOT NULL,
     username VARCHAR(50) NOT NULL,
     Full_Name VARCHAR(100),
@@ -13,7 +13,7 @@ CREATE TABLE users (
 
 DROP TABLE IF EXISTS products;
 CREATE TABLE products (
-    product_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    product_id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER NOT NULL,
     title VARCHAR(255),
     slug VARCHAR(255),
@@ -21,13 +21,17 @@ CREATE TABLE products (
     price DECIMAL(10,2),
     image_path VARCHAR(255),
     file_path VARCHAR(255),
-    is_active TINYINT DEFAULT 1
-    -- Missing foreign key constraint strictly enforcing user existence
+    is_active TINYINT DEFAULT 1,
+    
+    -- Foreign Key Constraint
+    CONSTRAINT fk_product_user
+    FOREIGN KEY (user_id) REFERENCES users(id) 
+    ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS Carts;  -- Mixed case table name
 CREATE TABLE Carts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     session_id VARCHAR(255),
     product_id INTEGER,
     quantity INTEGER DEFAULT 1,
@@ -36,7 +40,7 @@ CREATE TABLE Carts (
 
 DROP TABLE IF EXISTS orders;
 CREATE TABLE orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER,
     total_amount DECIMAL(10,2),
     payment_provider VARCHAR(50),
@@ -47,7 +51,7 @@ CREATE TABLE orders (
 
 DROP TABLE IF EXISTS payment_providers;
 CREATE TABLE payment_providers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id INTEGER,
     provider_name VARCHAR(50),
     api_key VARCHAR(255),
