@@ -2,6 +2,9 @@
 
 namespace SellNow\Controllers;
 
+use App\Support\Csrf;
+use App\Application\Auth\LoginService;
+
 class AuthController
 {
 
@@ -26,6 +29,14 @@ class AuthController
 
     public function login()
     {
+        if (empty($_POST['email']) || empty($_POST['password'])) {
+            die("Fill all fields");
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            Csrf::verify($_POST['_csrf'] ?? null);
+        }
+
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
 
@@ -34,13 +45,13 @@ class AuthController
         $stmt->execute([$email]);
         $user = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        if ($user && $password == $user['password']) {
+        if (!$user || !password_verify($password, $user['password'])) {
+            die('Invalid credentials');
+        } else {
+            session_regenerate_id(true);
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             header("Location: /dashboard");
-            exit;
-        } else {
-            header("Location: /login?error=Invalid credentials");
             exit;
         }
     }
@@ -52,18 +63,36 @@ class AuthController
 
     public function register()
     {
-        if (empty($_POST['email']) || empty($_POST['password']))
+        if (
+            empty($_POST['email']) ||
+            empty($_POST['password']) ||
+            empty($_POST['username']) ||
+            empty($_POST['fullname'])
+        ) {
             die("Fill all fields");
+        }
 
-        // Raw SQL
-        $sql = "INSERT INTO users (email, username, Full_Name, password) VALUES (?, ?, ?, ?)";
+        // ✅ HASH PASSWORD
+        $hashedPassword = password_hash(
+            $_POST['password'],
+            PASSWORD_DEFAULT
+        );
+
+        if ($hashedPassword === false) {
+            die("Failed to hash password");
+        }
+
+        $sql = "INSERT INTO users (email, username, Full_Name, password)
+                VALUES (?, ?, ?, ?)";
+
         $stmt = $this->db->prepare($sql);
+
         try {
             $stmt->execute([
                 $_POST['email'],
                 $_POST['username'],
                 $_POST['fullname'],
-                $_POST['password']
+                $hashedPassword
             ]);
         } catch (\Exception $e) {
             die("Error registering: " . $e->getMessage());
