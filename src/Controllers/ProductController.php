@@ -2,6 +2,8 @@
 
 namespace SellNow\Controllers;
 
+use App\Support\Csrf;
+
 class ProductController
 {
     private $twig;
@@ -26,6 +28,10 @@ class ProductController
     {
         if (!isset($_SESSION['user_id']))
             die("Unauthorized");
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            Csrf::verify($_POST['_csrf'] ?? null);
+        }
 
         $title = $_POST['title'];
         $price = $_POST['price'];
