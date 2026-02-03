@@ -255,4 +255,4 @@ What matters most is that the system now has a **clear architectural direction**
 
 **Author**  
 Ruhul Amin  
-Junior Software Engineer (Laravel / PHP)
+Software Engineer (Laravel / PHP)
